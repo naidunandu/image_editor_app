@@ -32,13 +32,51 @@ class _CameraScreenState extends State<CameraScreen> {
           ),
           body: Column(
             children: [
-              Container(
-                child: Row(
-                  children: [
-                    Column(
-                      children: [],
-                    )
-                  ],
+              Expanded(
+                child: _.imageFile != null
+                    ? Stack(
+                        children: [
+                          Image.file(_.imageFile!),
+                          Stack(
+                            children: _.shapes.map((shape) {
+                              final GlobalKey key = GlobalKey();
+                              return Positioned(
+                                left: shape.position.dx,
+                                top: shape.position.dy,
+                                child: Draggable(
+                                  key: key,
+                                  feedback: shape.widget,
+                                  childWhenDragging: Container(),
+                                  onDragEnd: (value) {
+                                    shape.position = value.offset;
+                                    _.update();
+                                  },
+                                  child: shape.widget,
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      )
+                    : Container(),
+              ),
+              GestureDetector(
+                onTap: () => _.addShape(),
+                child: Container(
+                  color: Colors.grey,
+                  width: MediaQuery.of(context).size.width,
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Column(
+                        children: [
+                          Icon(Icons.add, color: Colors.white),
+                          Text("Add Shape", style: TextStyle(color: Colors.white)),
+                        ],
+                      )
+                    ],
+                  ),
                 ),
               )
             ],
