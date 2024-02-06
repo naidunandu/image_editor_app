@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_editor_app/screens/camera/camera_controller.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:widgets_to_image/widgets_to_image.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -18,6 +19,7 @@ class _CameraScreenState extends State<CameraScreen> {
       builder: (_) {
         return Scaffold(
           appBar: AppBar(
+            automaticallyImplyLeading: false,
             title: const Text("Camera"),
             actions: [
               IconButton(
@@ -27,6 +29,10 @@ class _CameraScreenState extends State<CameraScreen> {
               IconButton(
                 onPressed: () async => _.getImage(ImageSource.gallery),
                 icon: const Icon(Icons.browse_gallery),
+              ),
+              IconButton(
+                onPressed: _.isDownloading ? null : () async => _.saveWidgetAsImage(context),
+                icon: _.isDownloading ? const CircularProgressIndicator() : const Icon(Icons.download),
               )
             ],
           ),
@@ -34,29 +40,32 @@ class _CameraScreenState extends State<CameraScreen> {
             children: [
               Expanded(
                 child: _.imageFile != null
-                    ? Stack(
-                        children: [
-                          Image.file(_.imageFile!),
-                          Stack(
-                            children: _.shapes.map((shape) {
-                              final GlobalKey key = GlobalKey();
-                              return Positioned(
-                                left: shape.position.dx,
-                                top: shape.position.dy,
-                                child: Draggable(
-                                  key: key,
-                                  feedback: shape.widget,
-                                  childWhenDragging: Container(),
-                                  onDragEnd: (value) {
-                                    shape.position = value.offset;
-                                    _.update();
-                                  },
-                                  child: shape.widget,
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ],
+                    ? WidgetsToImage(
+                        controller: _.controller,
+                        child: Stack(
+                          children: [
+                            Image.file(_.imageFile!),
+                            Stack(
+                              children: _.shapes.map((shape) {
+                                final GlobalKey key = GlobalKey();
+                                return Positioned(
+                                  left: shape.position.dx,
+                                  top: shape.position.dy,
+                                  child: Draggable(
+                                    key: key,
+                                    feedback: shape.widget,
+                                    childWhenDragging: Container(),
+                                    onDragEnd: (value) {
+                                      shape.position = value.offset;
+                                      _.update();
+                                    },
+                                    child: shape.widget,
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ),
                       )
                     : Container(),
               ),
@@ -72,7 +81,7 @@ class _CameraScreenState extends State<CameraScreen> {
                       Column(
                         children: [
                           Icon(Icons.add, color: Colors.white),
-                          Text("Add Shape", style: TextStyle(color: Colors.white)),
+                          Text("저장하기", style: TextStyle(color: Colors.white)),
                         ],
                       )
                     ],
